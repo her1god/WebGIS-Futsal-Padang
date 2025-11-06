@@ -362,4 +362,4 @@ MIT License - Free to use for educational and commercial purposes.
 
 **Last Updated:** October 25, 2025
 **Version:** 1.0.0
-**Author:** Fairuz
+**Author:** her1god
