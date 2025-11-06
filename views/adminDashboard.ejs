@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - WebGIS Futsal Padang</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <i class="fas fa-futbol"></i>
+                <span>Admin Dashboard</span>
+            </div>
+            <div class="nav-menu">
+                <a href="/" class="nav-link">Beranda</a>
+                <span class="nav-user">
+                    <i class="fas fa-user-shield"></i> <%= user.username %>
+                </span>
+                <a href="/logout" class="btn btn-secondary">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Admin Content -->
+    <div class="admin-container">
+        <div class="admin-sidebar">
+            <ul class="admin-menu">
+                <li><a href="#lapangan" class="active"><i class="fas fa-futbol"></i> Kelola Lapangan</a></li>
+                <li><a href="#rating"><i class="fas fa-star"></i> Kelola Rating</a></li>
+                <li><a href="/admin/analytics"><i class="fas fa-chart-line"></i> Analytics</a></li>
+            </ul>
+        </div>
+
+        <div class="admin-content">
+            <!-- Section: Kelola Lapangan -->
+            <section id="lapangan" class="admin-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-futbol"></i> Kelola Lapangan Futsal</h2>
+                    <button class="btn btn-primary" onclick="showAddModal()">
+                        <i class="fas fa-plus"></i> Tambah Lapangan
+                    </button>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nama Lapangan</th>
+                                <th>Alamat</th>
+                                <th>Harga</th>
+                                <th>Rating</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (lapanganList && lapanganList.length > 0) { %>
+                                <% lapanganList.forEach(function(lapangan) { %>
+                                    <tr>
+                                        <td><%= lapangan.id %></td>
+                                        <td><%= lapangan.nama_lapangan %></td>
+                                        <td><%= lapangan.alamat %></td>
+                                        <td>Rp <%= lapangan.harga_sewa.toLocaleString('id-ID') %></td>
+                                        <td>
+                                            <i class="fas fa-star"></i> 
+                                            <%= parseFloat(lapangan.avg_rating).toFixed(1) %>
+                                        </td>
+                                        <td class="action-buttons">
+                                            <button class="btn btn-sm btn-success" onclick="managePhotos(<%= lapangan.id %>, '<%= lapangan.nama_lapangan %>')">
+                                                <i class="fas fa-images"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-info" onclick="editLapangan(<%= lapangan.id %>)">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-danger" onclick="deleteLapangan(<%= lapangan.id %>)">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="6" class="text-center">Tidak ada data lapangan</td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Section: Kelola Rating -->
+            <section id="rating" class="admin-section" style="display: none;">
+                <div class="section-header">
+                    <h2><i class="fas fa-star"></i> Kelola Rating & Ulasan</h2>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>User</th>
+                                <th>Lapangan</th>
+                                <th>Rating</th>
+                                <th>Ulasan</th>
+                                <th>Tanggal</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (ratings && ratings.length > 0) { %>
+                                <% ratings.forEach(function(rating) { %>
+                                    <tr>
+                                        <td><%= rating.id %></td>
+                                        <td><%= rating.username %></td>
+                                        <td><%= rating.nama_lapangan %></td>
+                                        <td>
+                                            <% for(let i = 1; i <= 5; i++) { %>
+                                                <i class="fas fa-star <%= i <= rating.rating ? 'text-warning' : 'text-muted' %>"></i>
+                                            <% } %>
+                                        </td>
+                                        <td><%= rating.ulasan || '-' %></td>
+                                        <td><%= new Date(rating.created_at).toLocaleDateString('id-ID') %></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-danger" onclick="deleteRating(<%= rating.id %>)">
+                                                <i class="fas fa-trash"></i> Hapus
+                                            </button>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="7" class="text-center">Tidak ada rating</td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Modal: Add/Edit Lapangan -->
+    <div id="lapanganModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Tambah Lapangan</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <form id="lapanganForm">
+                <input type="hidden" id="lapanganId" name="id">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nama_lapangan">Nama Lapangan *</label>
+                        <input type="text" id="nama_lapangan" name="nama_lapangan" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="telepon">Telepon</label>
+                        <input type="text" id="telepon" name="telepon">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="alamat">Alamat *</label>
+                    <textarea id="alamat" name="alamat" rows="2" required></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="latitude">Latitude *</label>
+                        <input type="number" step="any" id="latitude" name="latitude" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="longitude">Longitude *</label>
+                        <input type="number" step="any" id="longitude" name="longitude" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <button type="button" class="btn btn-info btn-block" onclick="openMapPicker()">
+                        <i class="fas fa-map-marker-alt"></i> Pilih Lokasi dari Peta
+                    </button>
+                    <small class="form-text">Klik untuk memilih lokasi secara interaktif dari peta</small>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="harga_sewa">Harga Sewa (Rp/jam) *</label>
+                        <input type="number" id="harga_sewa" name="harga_sewa" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="jam_operasional">Jam Operasional</label>
+                        <input type="text" id="jam_operasional" name="jam_operasional" placeholder="08:00 - 22:00">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="deskripsi">Deskripsi</label>
+                    <textarea id="deskripsi" name="deskripsi" rows="3"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="fasilitas">Fasilitas</label>
+                    <textarea id="fasilitas" name="fasilitas" rows="2" placeholder="Contoh: Parkir, Kantin, Toilet, Ruang ganti"></textarea>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Manage Photos -->
+    <div id="photoModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3 id="photoModalTitle">Kelola Foto Lapangan</h3>
+                <span class="close" onclick="closePhotoModal()">&times;</span>
+            </div>
+            
+            <div class="photo-manager">
+                <!-- Upload Section -->
+                <div class="photo-upload-section">
+                    <h4><i class="fas fa-upload"></i> Upload Foto Baru</h4>
+                    <form id="photoUploadForm" enctype="multipart/form-data">
+                        <input type="hidden" id="photoLapanganId" name="lapanganId">
+                        
+                        <div class="form-group">
+                            <label for="photoFiles">Pilih Foto (Max 10 foto, max 5MB per foto)</label>
+                            <input type="file" id="photoFiles" name="photos" multiple accept="image/*" required>
+                            <small class="form-text">Format: JPG, PNG, GIF, WebP</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="photoCaption">Caption (opsional)</label>
+                            <input type="text" id="photoCaption" name="caption" placeholder="Deskripsi foto...">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-upload"></i> Upload Foto
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Gallery Section -->
+                <div class="photo-gallery-section">
+                    <h4><i class="fas fa-images"></i> Foto Saat Ini</h4>
+                    <div id="photoGallery" class="photo-gallery">
+                        <p class="text-center">Loading...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Map Picker -->
+    <div id="mapPickerModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3><i class="fas fa-map-marked-alt"></i> Pilih Lokasi dari Peta</h3>
+                <span class="close" onclick="closeMapPicker()">&times;</span>
+            </div>
+            
+            <div class="map-picker-container">
+                <!-- Search Box -->
+                <div class="map-search-box">
+                    <input type="text" id="mapSearch" placeholder="Cari lokasi (contoh: Lapangan Futsal Padang)..." />
+                    <button type="button" class="btn btn-primary" onclick="searchLocation()">
+                        <i class="fas fa-search"></i> Cari
+                    </button>
+                </div>
+
+                <!-- Search Results -->
+                <div id="searchResults" class="search-results" style="display: none;"></div>
+
+                <!-- Map -->
+                <div id="pickerMap" style="height: 400px; width: 100%;"></div>
+
+                <!-- Selected Location Info -->
+                <div id="selectedLocationInfo" class="location-info" style="display: none;">
+                    <h4><i class="fas fa-info-circle"></i> Lokasi Terpilih:</h4>
+                    <p><strong>Nama:</strong> <span id="selectedName">-</span></p>
+                    <p><strong>Alamat:</strong> <span id="selectedAddress">-</span></p>
+                    <p><strong>Koordinat:</strong> <span id="selectedCoords">-</span></p>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeMapPicker()">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="confirmLocation()" id="confirmLocationBtn" disabled>
+                        <i class="fas fa-check"></i> Gunakan Lokasi Ini
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="/js/admin.js"></script>
+</body>
+</html>

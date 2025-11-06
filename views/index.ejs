@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebGIS Lapangan Futsal Padang</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <i class="fas fa-futbol"></i>
+                <span>WEB GIS Futsal Kota Padang</span>
+            </div>
+            <div class="nav-menu">
+                <a href="/" class="nav-link active">Beranda</a>
+                <% if (user) { %>
+                    <span class="nav-user">
+                        <i class="fas fa-user-circle"></i> <%= user.username %>
+                    </span>
+                    <% if (user.role === 'admin') { %>
+                        <a href="/admin/dashboard" class="nav-link">Dashboard Admin</a>
+                    <% } %>
+                    <a href="/logout" class="btn btn-secondary">Logout</a>
+                <% } else { %>
+                    <a href="/login" class="btn btn-primary">Login</a>
+                    <a href="/register" class="btn btn-secondary">Register</a>
+                <% } %>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-wrapper">
+        <!-- Sidebar untuk daftar lapangan -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Lapangan Futsal</h2>
+                
+                <!-- Filter Panel -->
+                <div class="filter-panel">
+                    <div class="filter-section">
+                        <label class="filter-label">
+                            <i class="fas fa-search"></i> Cari Lapangan
+                        </label>
+                        <input type="text" id="searchInput" class="filter-input" placeholder="Nama atau alamat...">
+                    </div>
+
+                    <div class="filter-section">
+                        <label class="filter-label">
+                            <i class="fas fa-money-bill"></i> Harga Sewa (Rp/jam)
+                        </label>
+                        <div class="price-range-inputs">
+                            <input type="number" id="minPrice" class="filter-input-small" placeholder="Min">
+                            <span>-</span>
+                            <input type="number" id="maxPrice" class="filter-input-small" placeholder="Max">
+                        </div>
+                    </div>
+
+                    <div class="filter-section">
+                        <label class="filter-label">
+                            <i class="fas fa-star"></i> Rating Minimal
+                        </label>
+                        <select id="minRating" class="filter-select">
+                            <option value="">Semua Rating</option>
+                            <option value="1">⭐ 1+</option>
+                            <option value="2">⭐⭐ 2+</option>
+                            <option value="3">⭐⭐⭐ 3+</option>
+                            <option value="4">⭐⭐⭐⭐ 4+</option>
+                            <option value="5">⭐⭐⭐⭐⭐ 5</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-section">
+                        <label class="filter-label">
+                            <i class="fas fa-sort"></i> Urutkan
+                        </label>
+                        <select id="sortBy" class="filter-select">
+                            <option value="">Terbaru</option>
+                            <option value="price_asc">Harga: Rendah → Tinggi</option>
+                            <option value="price_desc">Harga: Tinggi → Rendah</option>
+                            <option value="rating_desc">Rating: Tertinggi</option>
+                            <option value="rating_asc">Rating: Terendah</option>
+                            <option value="name_asc">Nama: A → Z</option>
+                            <option value="name_desc">Nama: Z → A</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-buttons">
+                        <button id="applyFilterBtn" class="btn btn-primary btn-block">
+                            <i class="fas fa-filter"></i> Terapkan Filter
+                        </button>
+                        <button id="resetFilterBtn" class="btn btn-secondary btn-block">
+                            <i class="fas fa-redo"></i> Reset
+                        </button>
+                    </div>
+                </div>
+
+                <div class="location-buttons">
+                    <button id="findNearbyBtn" class="btn btn-primary">
+                        <i class="fas fa-location-crosshairs"></i> Cari Terdekat
+                    </button>
+                    <button id="refreshLocationBtn" class="btn btn-info" title="Refresh lokasi Anda">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="lapangan-list" id="lapanganList">
+                <% if (lapanganList && lapanganList.length > 0) { %>
+                    <% lapanganList.forEach(function(lapangan) { %>
+                        <div class="lapangan-card" data-id="<%= lapangan.id %>" 
+                             data-lat="<%= lapangan.latitude %>" 
+                             data-lng="<%= lapangan.longitude %>">
+                            <h3><%= lapangan.nama_lapangan %></h3>
+                            <p class="address">
+                                <i class="fas fa-map-marker-alt"></i> <%= lapangan.alamat %>
+                            </p>
+                            <p class="price">
+                                <i class="fas fa-tag"></i> 
+                                Rp <%= lapangan.harga_sewa.toLocaleString('id-ID') %>/jam
+                            </p>
+                            <div class="rating">
+                                <i class="fas fa-star"></i>
+                                <%= parseFloat(lapangan.avg_rating).toFixed(1) %> 
+                                (<%= lapangan.total_reviews %> ulasan)
+                            </div>
+                            <div class="distance-info" style="display: none;">
+                                <i class="fas fa-route"></i> <span class="distance-value"></span> km
+                            </div>
+                            <a href="/lapangan/<%= lapangan.id %>" class="btn btn-detail">
+                                Detail <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <p class="no-data">Belum ada data lapangan futsal.</p>
+                <% } %>
+            </div>
+        </aside>
+
+        <!-- Peta Interaktif -->
+        <main class="map-container">
+            <div id="map"></div>
+            
+            <!-- Panel Instruksi Rute -->
+            <div id="routePanel" class="route-panel" style="display: none;">
+                <!-- Instruksi rute akan ditampilkan di sini -->
+            </div>
+        </main>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="/js/map.js"></script>
+</body>
+</html>
