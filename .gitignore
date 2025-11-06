@@ -41,6 +41,11 @@ temp/
 futsal_db.sql
 database-update.sql
 
+# ALLOW database schema and seed files
+!database/schema.sql
+!database/seed.sql
+!database/README.md
+
 # Uploads (user-generated content)
 public/uploads/
 uploads/
