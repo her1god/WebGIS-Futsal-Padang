@@ -211,7 +211,7 @@ git push origin main
 
 Di Linux, jalankan:
 ```bash
-cd /home/her1god/Documents/skripsi\ fairuz/webgis-futsal
+cd /home/her1god/Documents/skripsi/webgis-futsal
 
 # Pull perubahan dari Windows
 git pull origin main
