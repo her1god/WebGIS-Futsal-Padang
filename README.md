@@ -123,7 +123,6 @@ Pastikan sudah terinstal:
 
 ### 2. Clone Repository
 ```bash
-cd "skripsi fairuz"
 cd webgis-futsal
 ```
 
@@ -430,7 +429,7 @@ Kontribusi sangat diterima! Silakan:
 
 **MIT License**
 
-Copyright (c) 2025 Fairuz - WebGIS Futsal Padang
+Copyright (c) 2025 her1god - WebGIS Futsal Padang
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software.
 
@@ -438,9 +437,9 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 
 ## 👨‍💻 Author
 
-**Fairuz**
-- Universitas/Institusi: [Nama Universitas]
-- Program Studi: [Nama Program Studi]
+**Heri Ramadhan**
+- Universitas/Institusi: [xxx]
+- Program Studi: [xxx]
 - Tahun: 2025
 
 ---
@@ -467,4 +466,4 @@ Jika ada pertanyaan atau issues:
 
 ---
 
-*Dibuat dengan ❤️ untuk Tugas Akhir/Skripsi - Sistem Informasi Geografis Lapangan Futsal Kota Padang*
+*ZzZ*
