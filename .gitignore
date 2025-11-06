@@ -61,3 +61,8 @@ test-db.js
 fix-admin-password.js
 generate_password.sh
 
+# ALLOW utility scripts folder
+!scripts/
+!scripts/*.js
+!scripts/README.md
+
